@@ -265,10 +265,10 @@
                     var trialCard = this.workingList[rand];
                     if (typeof trialCard == 'undefined'){
                         final = this.failCard;
-                        if (!typeof tag == "undefined"){
-                            final.tags = [tag];
-                        }else{
+                        if (typeof tag == "undefined"){
                             final.tags = [];
+                        }else{
+                            final.tags = [tag];
                         }
                         
                         found = true;
@@ -290,7 +290,6 @@
                 return final;
             }
             generateGame(rules) {
-                console.log(this.mainCardList)
                 this.ruleSet = rules;
                 var numGenerated = 0;
                 for (var i = 0; i < this.ruleSet.rules.length; i++) {
@@ -298,7 +297,6 @@
                 }
                 var numRemaining = this.ruleSet.num - numGenerated;
                 this.makeCardSet(numRemaining);
-                console.log(this.mainCardList)
                 display(this.cards)
             }
         }
