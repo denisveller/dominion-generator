@@ -43,9 +43,13 @@
         .yes {
             color: green;
         }
+
+        .txtBx {
+            width: 10%;
+        }
     </style>
 
-    <title>Dominon Generator 4.0</title>
+    <title>Dominon Generator 5.0</title>
 </head>
 
 <body>
@@ -54,19 +58,21 @@
             <br>
             <form class="bd-example">
                 <fieldset control-id="ControlID-3">
-                    <legend>Dominion Generator V4.0.0</legend>
-                    <br>
+                    <legend>Dominion Generator V5.0.0</legend>
+                    <p><i>For number of events/attacks, follow prompt syntax</i></p>
+                    <p><i>Events are only in Adventure & Empire. Set quantity to 0-0 if not using those expansions.</i>
+                    </p>
                     <p>
                         <label for="input">Number of Cards</label>
-                        <input type="text" id="num" placeholder="10">
+                        <input type="text" id="num" placeholder="10" class="txtBx">
                     </p>
                     <p>
-                        <label for="input">Max Number of Events</label>
-                        <input type="text" id="maxEvents" placeholder="2">
+                        <label for="input">Number of Events</label>
+                        <input type="text" id="maxEvents" placeholder="0-2" class="txtBx">
                     </p>
                     <p>
-                        <label for="input">Max Number of Attacks</label>
-                        <input type="text" id="maxAttacks" placeholder="1">
+                        <label for="input">Number of Attacks</label>
+                        <input type="text" id="maxAttacks" placeholder="0-1" class="txtBx">
                     </p>
                     <p>
                         <label>
@@ -140,9 +146,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
         crossorigin="anonymous"></script>
-
-    <script src="/socket.io/socket.io.js"></script>
-
     <script>
         class Card {
             constructor(name, expansion, tags) {
@@ -151,98 +154,178 @@
                 this.tags = tags;
             }
         }
-        var cards = [];
-        var cardsOnScreen = [];
-        var permittedExpansions = [];
-        function generateList() {
-            cards = [];
-            //This generates arrays of card names by expansion. This is an easy way to exctact them from lists on wiki.
-            var bStr = "Cellar, Chapel, Moat, Village, Workshop, Bureaucrat, Gardens, Militia, Moneylender, Remodel, Smithy, Throne Room, Council Room, Festival, Laboratory, Library, Market, Mine, Witch, Chancellor, Woodcutter, Feast, Spy, Thief, Adventurer";
-            var b = bStr.split(", ");
-
-            var pStr = 'Loan, Trade Route, Watchtower, Bishop, Monument, Quarry, Talisman, Worker\'s Village, City, Contraband, Counting House, Mint, Mountebank, Rabble, Royal Seal, Vault, Venture, Goons, Grand Market, Hoard, Bank, Expand, Forge, King\'s Court, Peddler';
-            var p = pStr.split(", ");
-
-            var aStr = "Transmute, Vineyard, Herbalist, Apothecary, Scrying Pool, University, Alchemist, Familiar, Philosopher's Stone, Golem, Apprentice, Possession";
-            var a = aStr.split(", ");
-
-            var gStr = "Candlestick Maker, Stonemason, Doctor, Masterpiece, Advisor, Plaza, Taxman, Herald, Baker, Butcher, Journeyman, Merchant Guild, Soothsayer";
-            var g = gStr.split(", ");
-
-            var cStr = "Hamlet, Fortune Teller, Menagerie, Farming Village, Horse Traders, Remake, Tournament, Young Witch, Harvest, Horn of Plenty, Hunting Party, Jester, Fairgrounds";
-            var c = cStr.split(", ");
-
-            var adSTR = "Coin of the Realm, Page, Peasant, Ratcatcher, Raze, Amulet, Caravan Guard, Dungeon, Gear, Guide, Duplicate, Magpie, Messenger, Miser, Port, Ranger, Transmogrify, Artificer, Bridge Troll, Distant Lands, Giant, Haunted, Woods, Lost City, Relic, Royal Carriage, Storyteller, Swamp Hag, Treasure Trove, Wine Merchant, Hireling, Alms, Borrow, Quest, Save, Scouting Party, Travelling Fair, Bonfire, Expedition, Ferry, Plan, Mission, Pilgrimage, Ball, Raid, Seaway, Trade, Lost Arts, Training, Inheritance, Pathfinding"
-            var adE = adSTR.split(", ");
-
-            var emStr = "Engineer, City Quarter, Overlord, Royal Blacksmith, Encampment/Plunder, Patrician/Emporium, Settlers/Bustling Village, Castles, Catapult/Rocks, Chariot Race, Enchantress, Farmers' Market, Gladiator/Fortune, Sacrifice, Temple, Villa, Archive, Capital, Charm, Crown, Forum, Groundskeeper, Legionary, Wild Hunt, Triumph, Annex, Donate, Advance, Delve, Tax, Banquet, Ritual, Salt the Earth, Wedding, Windfall, Conquest, Dominate";
-            var emE = emStr.split(", ");
-
-            //This is a place to crate lists of cards that match a certain tag, such as event, attack, or "banned" - not that i'm implimenting banned
-
-            var eventsStr = "Triumph, Annex, Donate, Advance, Delve, Tax, Banquet, Ritual, Salt the Earth, Wedding, Windfall, Conquest, Dominate, Alms, Borrow, Quest, Save, Scouting Party, Travelling Fair, Bonfire, Expedition, Ferry, Plan, Mission, Pilgrimage, Ball, Raid, Seaway, Trade, Lost Arts, Training, Inheritance, Pathfinding"
-            events = eventsStr.split(", ");
-            var attackStr = "Dominion: Bureaucrat, Militia, Spy, Thief, Bandit, Witch, Swindler, Minion, Replace, Saboteur, Torturer, Ambassador, Blockade, Cutpurse, Pirate Ship, Sea Hag, Corsair, Ghost Ship, Sea Witch, Scrying Pool, Familiar, Clerk, Charlatan, Mountebank, Rabble, Goons, Fortune Teller, Young Witch, Jester, Followers, Oracle, Noble Brigand, Berserker, Cauldron, Margrave, Witch's Hut, Urchin, Mercenary, Marauder, Cultist, Knights, Pillage, Rogue, Taxman, Soothsayer, Warrior, Soldier, Bridge Troll, Giant, Haunted Woods, Swamp Hag, Relic, Catapult, Enchantress, Legionary, Skulk, Idol, Tormentor, Vampire, Werewolf, Raider, Old Witch, Villain, Black Cat, Cardinal, Coven, Gatekeeper, Archer, Barbarian, Highwayman, Skirmisher, Sorcerer, Sorceress, Warlord, Cutthroat, Frigate, Siren, Sword, Trickster";
-            attacks = attackStr.split(", ");
-
-            //card obj initialization and basic population
-            for (i = 0; i < b.length; i++) {
-                temp = new Card(b[i], "Base", ["Daysen"]);
-                cards.push(temp);
-            }
-            for (i = 0; i < p.length; i++) {
-                temp = new Card(p[i], "Prosperity", ["Daysen"]);
-                cards.push(temp);
-            }
-            for (i = 0; i < a.length; i++) {
-                temp = new Card(a[i], "Alchemy", ["Daysen"]);
-                cards.push(temp);
-            }
-            for (i = 0; i < g.length; i++) {
-                temp = new Card(g[i], "Guilds", ["Daysen"]);
-                cards.push(temp);
-            }
-            for (i = 0; i < c.length; i++) {
-                temp = new Card(c[i], "Cornucopia", ["Daysen"]);
-                cards.push(temp);
-            }
-            for (i = 0; i < adE.length; i++) {
-                temp = new Card(adE[i], "Adventure", []);
-                cards.push(temp);
-            }
-            for (i = 0; i < emE.length; i++) {
-                temp = new Card(emE[i], "Empires", []);
-                cards.push(temp);
-            }
-
-            //tag tagging
-            for (i = 0; i < cards.length; i++) {
-                if (events.includes(cards[i].name)) {
-                    cards[i].tags.push("Event");
-                }
-                if (attacks.includes(cards[i].name)) {
-                    cards[i].tags.push("Attack");
-                }
+        class Rule {
+            constructor(range, tag) {
+                this.range = range;
+                this.tag = tag;
             }
         }
+        class RuleSet {
+            constructor(num, expansions, rules) {
+                this.num = num;
+                this.expansions = expansions;
+                this.rules = rules;
+            }
+        }
+        class Game {
+            constructor() {
+                this.mainCardList = this.synthesizeCardList();
+                this.workingList = this.mainCardList.slice();
+
+                this.ruleSet = [];
+
+                this.failCard = new Card("FAIL", "OUT OF CARDS");
+
+                this.cards = [];
+            }
+            synthesizeCardList() {
+                var cards = [];
+                //This generates arrays of card names by expansion. This is an easy way to exctact them from lists on wiki.
+                var bStr = "Cellar, Chapel, Moat, Village, Workshop, Bureaucrat, Gardens, Militia, Moneylender, Remodel, Smithy, Throne Room, Council Room, Festival, Laboratory, Library, Market, Mine, Witch, Chancellor, Woodcutter, Feast, Spy, Thief, Adventurer";
+                var b = bStr.split(", ");
+
+                var pStr = 'Loan, Trade Route, Watchtower, Bishop, Monument, Quarry, Talisman, Worker\'s Village, City, Contraband, Counting House, Mint, Mountebank, Rabble, Royal Seal, Vault, Venture, Goons, Grand Market, Hoard, Bank, Expand, Forge, King\'s Court, Peddler';
+                var p = pStr.split(", ");
+
+                var aStr = "Transmute, Vineyard, Herbalist, Apothecary, Scrying Pool, University, Alchemist, Familiar, Philosopher's Stone, Golem, Apprentice, Possession";
+                var a = aStr.split(", ");
+
+                var gStr = "Candlestick Maker, Stonemason, Doctor, Masterpiece, Advisor, Plaza, Taxman, Herald, Baker, Butcher, Journeyman, Merchant Guild, Soothsayer";
+                var g = gStr.split(", ");
+
+                var cStr = "Hamlet, Fortune Teller, Menagerie, Farming Village, Horse Traders, Remake, Tournament, Young Witch, Harvest, Horn of Plenty, Hunting Party, Jester, Fairgrounds";
+                var c = cStr.split(", ");
+
+                var adSTR = "Coin of the Realm, Page, Peasant, Ratcatcher, Raze, Amulet, Caravan Guard, Dungeon, Gear, Guide, Duplicate, Magpie, Messenger, Miser, Port, Ranger, Transmogrify, Artificer, Bridge Troll, Distant Lands, Giant, Haunted, Woods, Lost City, Relic, Royal Carriage, Storyteller, Swamp Hag, Treasure Trove, Wine Merchant, Hireling, Alms, Borrow, Quest, Save, Scouting Party, Travelling Fair, Bonfire, Expedition, Ferry, Plan, Mission, Pilgrimage, Ball, Raid, Seaway, Trade, Lost Arts, Training, Inheritance, Pathfinding"
+                var adE = adSTR.split(", ");
+
+                var emStr = "Engineer, City Quarter, Overlord, Royal Blacksmith, Encampment/Plunder, Patrician/Emporium, Settlers/Bustling Village, Castles, Catapult/Rocks, Chariot Race, Enchantress, Farmers' Market, Gladiator/Fortune, Sacrifice, Temple, Villa, Archive, Capital, Charm, Crown, Forum, Groundskeeper, Legionary, Wild Hunt, Triumph, Annex, Donate, Advance, Delve, Tax, Banquet, Ritual, Salt the Earth, Wedding, Windfall, Conquest, Dominate";
+                var emE = emStr.split(", ");
+
+                //This is a place to crate lists of cards that match a certain tag, such as event, attack, or "banned" - not that i'm implimenting banned
+
+                var eventsStr = "Triumph, Annex, Donate, Advance, Delve, Tax, Banquet, Ritual, Salt the Earth, Wedding, Windfall, Conquest, Dominate, Alms, Borrow, Quest, Save, Scouting Party, Travelling Fair, Bonfire, Expedition, Ferry, Plan, Mission, Pilgrimage, Ball, Raid, Seaway, Trade, Lost Arts, Training, Inheritance, Pathfinding"
+                var events = eventsStr.split(", ");
+                var attackStr = "Dominion: Bureaucrat, Militia, Spy, Thief, Bandit, Witch, Swindler, Minion, Replace, Saboteur, Torturer, Ambassador, Blockade, Cutpurse, Pirate Ship, Sea Hag, Corsair, Ghost Ship, Sea Witch, Scrying Pool, Familiar, Clerk, Charlatan, Mountebank, Rabble, Goons, Fortune Teller, Young Witch, Jester, Followers, Oracle, Noble Brigand, Berserker, Cauldron, Margrave, Witch's Hut, Urchin, Mercenary, Marauder, Cultist, Knights, Pillage, Rogue, Taxman, Soothsayer, Warrior, Soldier, Bridge Troll, Giant, Haunted Woods, Swamp Hag, Relic, Catapult/Rocks, Enchantress, Legionary, Skulk, Idol, Tormentor, Vampire, Werewolf, Raider, Old Witch, Villain, Black Cat, Cardinal, Coven, Gatekeeper, Archer, Barbarian, Highwayman, Skirmisher, Sorcerer, Sorceress, Warlord, Cutthroat, Frigate, Siren, Sword, Trickster";
+                var attacks = attackStr.split(", ");
+
+                //card obj initialization and basic population
+                for (var i = 0; i < b.length; i++) {
+                    cards.push(new Card(b[i], "Base", ["Daysen"]));
+                }
+                for (var i = 0; i < p.length; i++) {
+                    cards.push(new Card(p[i], "Prosperity", ["Daysen"]));
+                }
+                for (var i = 0; i < a.length; i++) {
+                    cards.push(new Card(a[i], "Alchemy", ["Daysen"]));
+                }
+                for (var i = 0; i < g.length; i++) {
+                    cards.push(new Card(g[i], "Guilds", ["Daysen"]));
+                }
+                for (var i = 0; i < c.length; i++) {
+                    cards.push(new Card(c[i], "Cornucopia", ["Daysen"]));
+                }
+                for (var i = 0; i < adE.length; i++) {
+                    cards.push(new Card(adE[i], "Adventure", []));
+                }
+                for (var i = 0; i < emE.length; i++) {
+                    cards.push(new Card(emE[i], "Empires", []));
+                }
+
+                //tag tagging
+                for (var i = 0; i < cards.length; i++) {
+                    if (events.includes(cards[i].name)) {
+                        cards[i].tags.push("Event");
+                    }
+                    if (attacks.includes(cards[i].name)) {
+                        cards[i].tags.push("Attack");
+                    }
+                }
+                return (cards)
+            }
+            makeRestrictedCardSet(rule) {
+                var max = Math.max(...rule.range)
+                var min = Math.min(...rule.range)
+                var range = max - min;
+                var num = Math.round(Math.random() * range) + min;
+                this.makeCardSet(num, rule.tag);
+                return num;
+            }
+            makeCardSet(num, tag) {
+                var i = 0;
+                for (var i = 0; i < num; i++) {
+                    this.cards.push(this.newCard(tag))
+                }
+            }
+            newCard(tag) {
+                var final = [];
+                var found = false;
+                while (!found) {
+                    var rand = Math.floor(Math.random() * this.workingList.length);
+                    var trialCard = this.workingList[rand];
+                    if (typeof trialCard == 'undefined'){
+                        final = this.failCard;
+                        if (!typeof tag == "undefined"){
+                            final.tags = [tag];
+                        }else{
+                            final.tags = [];
+                        }
+                        
+                        found = true;
+                    }else if (this.ruleSet.expansions.includes(trialCard.expansion)) {
+                        if (trialCard.tags.includes(tag)) {
+                            final = trialCard;
+                            found = true;
+                        }
+                        if ((typeof tag == 'undefined') && ((trialCard.tags == 'Daysen') || (trialCard.tags.length == 0))) {
+                            final = trialCard;
+                            found = true;
+                        }
+                    }
+                    this.workingList.splice(rand, 1);
+                }
+                var x = this.mainCardList.indexOf(final);
+                this.mainCardList.splice(x, 1);
+                this.workingList = this.mainCardList.slice();
+                return final;
+            }
+            generateGame(rules) {
+                console.log(this.mainCardList)
+                this.ruleSet = rules;
+                var numGenerated = 0;
+                for (var i = 0; i < this.ruleSet.rules.length; i++) {
+                    numGenerated = numGenerated + this.makeRestrictedCardSet(this.ruleSet.rules[i]);
+                }
+                var numRemaining = this.ruleSet.num - numGenerated;
+                this.makeCardSet(numRemaining);
+                console.log(this.mainCardList)
+                display(this.cards)
+            }
+        }
+
+
+        game = new Game();
+
         function submit() {
             //Reading user inputs about generation settings -  kinda legacy code from v3.0 - but it works
             var expansions = ["Base", "Prosperity", "Alchemy", "Guilds", "Cornucopia", "Adventure", "Empires"];
             var desiredExpansions = [];
             var num = document.getElementById("num").value;
-            var maxEvents = document.getElementById("maxEvents").value;
-            var maxAttacks = document.getElementById("maxAttacks").value;
-
+            var numEvents = document.getElementById("maxEvents").value;
+            var numAttacks = document.getElementById("maxAttacks").value;
+            attacks = new Rule([0, 1], "Attack");
+            events = new Rule([0, 2], "Event");
+            if (!numAttacks == '') {
+                attacks.range[0] = numAttacks[0];
+                attacks.range[1] = numAttacks[2];
+            }
+            if (!numEvents == '') {
+                events.range[0] = numEvents[0];
+                events.range[1] = numEvents[2];
+            }
             if (num == '') {
                 num = 10;
             }
-            if (maxEvents == '') {
-                maxEvents = 2;
-            }
-            if (maxAttacks == '') {
-                maxAttacks = 1;
-            }
-
 
             var flag = false;
             if (document.getElementById("b").checked) {
@@ -266,51 +349,15 @@
             if (document.getElementById("em").checked) {
                 desiredExpansions.push(expansions[6]);
             }
-            generate(desiredExpansions, num, maxEvents, maxAttacks);
-            permittedExpansions = desiredExpansions;
+
+            cardRules = new RuleSet(num, desiredExpansions, [attacks, events]);
+            game.generateGame(cardRules);
+
         }
-        function generate(desiredExpansions, numGenerated, maxEvents, maxAttacks) {
-            var cardList = [];
-            var eventCounter = 0;
-            var attackCounter = 0;
-
-            while (numGenerated > cardList.length) {
-                var x = Math.floor(Math.random() * cards.length); //generate a random card
-                var newCard = cards[x]
-                var rFlag = false; //This, when true, prevents card removal. done when an event/attack is cancelled for being disallowed, to keep it in pool for rerolls.
-
-                if (desiredExpansions.includes(newCard.expansion)) { //check if matches selected expansion
-
-                    var failFlag = false;
-
-                    if (newCard.tags.includes("Event")) {
-                        if (eventCounter < maxEvents) {
-                            eventCounter++;
-                            numGenerated++; //events dont count against num cards
-                        } else {
-                            rFlag = true;
-                            failFlag = true;
-                        }
-                    }
-                    if (newCard.tags.includes("Attack")) {
-                        if (attackCounter < maxAttacks) {
-                            attackCounter++;
-                        } else {
-                            rFlag = true;
-                            failFlag = true;
-                        }
-                    }
-                    if (!failFlag) {
-                        cardList.push(newCard);
-                    }
-                }
-                if(!rFlag){
-                    cards.splice(x, 1);
-                }
-            }
-            
-            var first = cardList[0];
-            //here, we start to interface with 3.0 code, because I am not redoing the front end. ever. (I swore off v4 to begin with tho...)
+        function display(cardList) {
+            var end = cardList.length - 1;
+            var first = cardList[end];
+            //here, we start to interface with 3.0 code (which is probably legacy 1.0 code), because I am not redoing the front end. ever. I did swear off ever going past 3.0 and this is 5.0, so ...
             outHTML = "";
 
             if (first.expansion == "Prosperity") {
@@ -366,9 +413,10 @@
             document.getElementById("in").style.display = "block";
             document.getElementById("out").style.display = "none";
             document.getElementById("cards").innerHTML = "";
-            generateList();
+            game = new Game();
         }
         function reroll(negId) {
+            var cardsOnSceen = game.cards.slice();
             var id = -1 * negId;
             var item = document.getElementById(id);
             var index = item.innerHTML.indexOf('<');
@@ -385,49 +433,24 @@
                 }
             }
             card = cardsOnScreen[j];
-            var eventFlag = false;
-            if (card.tags.includes("Event")) {
-                eventFlag = true;
-            }
-            found = false;
-            count = 0; //such a bad solution but ok
-            while (!found) {
-                var rFlag = false; //same usecase as above
-                var x = Math.floor(Math.random() * cards.length); //generate a random card
-                var newCard = cards[x]
-                if (permittedExpansions.includes(newCard.expansion)) {
-                    if (eventFlag) {
-                        if (newCard.tags.includes("Event")) {
-                            found = true;
-                            cardsOnScreen[j] = newCard;
-                        }
-                        else{
-                            rFlag = true;
-                        }
-                    } else {
-                        if (!(newCard.tags.includes("Event"))) {
-                            found = true;
-                            cardsOnScreen[j] = newCard;
-                        }
-                        else{
-                            rFlag = true;
-                        }
+            newCard = [];
+
+            if (card.tags.length == 0) {
+                newCard = game.newCard()
+            } else {
+                card.tags.forEach(element => {
+                    if (!element == "Daysen") {
+                        newCard = game.newCard(element)
                     }
-                }
-                if(!rFlag){
-                    cards.splice(x, 1);
-                }
-                if ((count > 200)||(cards.length == 0)) {
-                    found = true;
-                    var arg = [];
-                    if(eventFlag){
-                        arg = ["Event"]
-                    }
-                    cardsOnScreen[j] = new Card("OUT OF CARDS", "", arg);
-                }
-                count++;
+                });
             }
-            card = cardsOnScreen[j];
+            if (typeof newCard == "undefined"){
+                newCard = game.failCard;
+            }
+            cardsOnScreen[j] = newCard;
+            game.cards[j] = newCard;
+            card = newCard;
+            
             var temp = "";
             if (card.tags[0] == "Daysen") {
                 card.tags.shift();
@@ -443,10 +466,9 @@
                 }
             }
 
-            item.innerHTML = temp+ buttonBody;
+            item.innerHTML = temp + buttonBody;
             item.classList.add("no");
         }
-        generateList();
     </script>
 </body>
 
