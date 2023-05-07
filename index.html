@@ -59,8 +59,8 @@
             <form class="bd-example">
                 <fieldset control-id="ControlID-3">
                     <legend>Dominion Generator V5.0.0</legend>
-                    <p><i>For number of events/attacks, follow prompt syntax</i></p>
-                    <p><i>Events are only in Adventure & Empire. Set quantity to 0-0 if not using those expansions.</i>
+                    <p><i>For a range of values, input a-b</i></p>
+                    <p><i>Events are only in Adventure & Empire. Set quantity to 0 if not using those expansions.</i>
                     </p>
                     <p>
                         <label for="input">Number of Cards</label>
@@ -68,11 +68,11 @@
                     </p>
                     <p>
                         <label for="input">Number of Events</label>
-                        <input type="text" id="maxEvents" placeholder="0-2" class="txtBx">
+                        <input type="text" id="maxEvents" placeholder="2" class="txtBx">
                     </p>
                     <p>
                         <label for="input">Number of Attacks</label>
-                        <input type="text" id="maxAttacks" placeholder="0-1" class="txtBx">
+                        <input type="text" id="maxAttacks" placeholder="1" class="txtBx">
                     </p>
                     <p>
                         <label>
@@ -263,16 +263,16 @@
                 while (!found) {
                     var rand = Math.floor(Math.random() * this.workingList.length);
                     var trialCard = this.workingList[rand];
-                    if (typeof trialCard == 'undefined'){
+                    if (typeof trialCard == 'undefined') {
                         final = this.failCard;
-                        if (typeof tag == "undefined"){
+                        if (typeof tag == "undefined") {
                             final.tags = [];
-                        }else{
+                        } else {
                             final.tags = [tag];
                         }
-                        
+
                         found = true;
-                    }else if (this.ruleSet.expansions.includes(trialCard.expansion)) {
+                    } else if (this.ruleSet.expansions.includes(trialCard.expansion)) {
                         if (trialCard.tags.includes(tag)) {
                             final = trialCard;
                             found = true;
@@ -293,9 +293,9 @@
                 this.ruleSet = rules;
                 var numGenerated = 0;
                 for (var i = 0; i < this.ruleSet.rules.length; i++) {
-                    if (this.ruleSet.rules[i].tag == "Event"){
+                    if (this.ruleSet.rules[i].tag == "Event") {
                         this.makeRestrictedCardSet(this.ruleSet.rules[i]);
-                    }else{
+                    } else {
                         numGenerated = numGenerated + this.makeRestrictedCardSet(this.ruleSet.rules[i]);
                     }
                 }
@@ -315,20 +315,32 @@
             var num = document.getElementById("num").value;
             var numEvents = document.getElementById("maxEvents").value;
             var numAttacks = document.getElementById("maxAttacks").value;
-            attacks = new Rule([0, 1], "Attack");
-            events = new Rule([0, 2], "Event");
-            if (!numAttacks == '') {
-                attacks.range[0] = numAttacks[0];
-                attacks.range[1] = numAttacks[2];
-            }
+            attacks = new Rule([1, 1], "Attack");
+            events = new Rule([2, 2], "Event");
             if (!numEvents == '') {
-                events.range[0] = numEvents[0];
-                events.range[1] = numEvents[2];
+                if (numEvents.includes("-")) {
+                    events.range[0] = numEvents[0];
+                    events.range[1] = numEvents[2];
+                } else {
+                    events.range[0] = numEvents;
+                    events.range[1] = numEvents;
+                }
             }
+            if (!numAttacks == '') {
+                if (numAttacks.includes("-")) {
+                    attacks.range[0] = numAttacks[0];
+                    attacks.range[1] = numAttacks[2];
+                } else {
+                    attacks.range[0] = numAttacks;
+                    attacks.range[1] = numAttacks;
+                }
+            }
+
             if (num == '') {
                 num = 10;
             }
 
+            console.log(attacks, events, num)
             var flag = false;
             if (document.getElementById("b").checked) {
                 desiredExpansions.push(expansions[0]);
@@ -446,13 +458,13 @@
                     }
                 });
             }
-            if (typeof newCard == "undefined"){
+            if (typeof newCard == "undefined") {
                 newCard = game.failCard;
             }
             cardsOnScreen[j] = newCard;
             game.cards[j] = newCard;
             card = newCard;
-            
+
             var temp = "";
             if (card.tags[0] == "Daysen") {
                 card.tags.shift();
