@@ -47,6 +47,10 @@
         .txtBx {
             width: 10%;
         }
+        .setup{
+            margin: 0%;
+        }
+        
     </style>
 
     <title>Dominon Generator 5.0</title>
@@ -59,58 +63,56 @@
             <form class="bd-example">
                 <fieldset control-id="ControlID-3">
                     <legend>Dominion Generator V5.0.0</legend>
-                    <p><i>For a range of values, input a-b</i></p>
-                    <p><i>Events are only in Adventure & Empire. Set quantity to 0 if not using those expansions.</i>
-                    </p>
-                    <p>
+                    <p class="setup"><i>For a range of values, input a-b</i></p>
+                    <p class="setup">
                         <label for="input">Number of Cards</label>
                         <input type="text" id="num" placeholder="10" class="txtBx">
                     </p>
-                    <p>
+                    <p class="setup">
                         <label for="input">Number of Events</label>
                         <input type="text" id="maxEvents" placeholder="2" class="txtBx">
                     </p>
-                    <p>
+                    <p class="setup">
                         <label for="input">Number of Attacks</label>
                         <input type="text" id="maxAttacks" placeholder="1" class="txtBx">
                     </p>
-                    <p>
+                    <p class="setup">
                         <label>
                             <input type="checkbox" value="" id="b" checked>
                             Base game
                         </label>
                     </p>
-                    <p>
+                    <p class="setup">
                         <label>
                             <input type="checkbox" value="" id="p" checked>
                             Prosperity
                         </label>
                     </p>
-                    <p>
+                    <p class="setup">
                         <label>
                             <input type="checkbox" value="" id="a" checked>
                             Alchemy
                         </label>
                     </p>
-                    <p>
+                    <p class="setup">
                         <label>
                             <input type="checkbox" value="" id="g" checked>
                             Guilds
                         </label>
                     </p>
-                    <p>
+                    <p class="setup">
                         <label>
                             <input type="checkbox" value="" id="c" checked>
                             Cornocupia
                         </label>
                     </p>
-                    <p>
+                    <p class="setup">
                         <label>
                             <input type="checkbox" value="" id="ad" checked>
                             Adventure
                         </label>
                     </p>
-                    <p>
+                    <p class="setup">
                         <label>
                             <input type="checkbox" value="" id="em" checked>
                             Empire
@@ -315,6 +317,30 @@
             var num = document.getElementById("num").value;
             var numEvents = document.getElementById("maxEvents").value;
             var numAttacks = document.getElementById("maxAttacks").value;
+            
+            if (document.getElementById("b").checked) {
+                desiredExpansions.push(expansions[0]);
+            }
+            if (document.getElementById("p").checked) {
+                desiredExpansions.push(expansions[1]);
+            }
+            if (document.getElementById("a").checked) {
+                desiredExpansions.push(expansions[2]);
+            }
+            if (document.getElementById("g").checked) {
+                desiredExpansions.push(expansions[3]);
+            }
+            if (document.getElementById("c").checked) {
+                desiredExpansions.push(expansions[4]);
+            }
+            if (document.getElementById("ad").checked) {
+                desiredExpansions.push(expansions[5]);
+            }
+            if (document.getElementById("em").checked) {
+                desiredExpansions.push(expansions[6]);
+            }
+
+
             attacks = new Rule([1, 1], "Attack");
             events = new Rule([2, 2], "Event");
             if (!numEvents == '') {
@@ -338,30 +364,6 @@
 
             if (num == '') {
                 num = 10;
-            }
-
-            console.log(attacks, events, num)
-            var flag = false;
-            if (document.getElementById("b").checked) {
-                desiredExpansions.push(expansions[0]);
-            }
-            if (document.getElementById("p").checked) {
-                desiredExpansions.push(expansions[1]);
-            }
-            if (document.getElementById("a").checked) {
-                desiredExpansions.push(expansions[2]);
-            }
-            if (document.getElementById("g").checked) {
-                desiredExpansions.push(expansions[3]);
-            }
-            if (document.getElementById("c").checked) {
-                desiredExpansions.push(expansions[4]);
-            }
-            if (document.getElementById("ad").checked) {
-                desiredExpansions.push(expansions[5]);
-            }
-            if (document.getElementById("em").checked) {
-                desiredExpansions.push(expansions[6]);
             }
 
             cardRules = new RuleSet(num, desiredExpansions, [attacks, events]);
@@ -396,6 +398,7 @@
         }
         function expansionSort(cardList) {
             //This sorts by expansion, excpet not cards flagged as "daysen". Ouptups array of strings for final display
+            //Inadvertently sorts out fail cards, but it works
             var daysenList = [];
             var adventureList = [];
             var empiresList = [];
